@@ -1,5 +1,6 @@
 name: Publish
 
+# We are only interested in Pull Requests and Pushes
 on:
   pull_request:
     branches:
@@ -22,10 +23,10 @@ jobs:
         id: setup
         run: |
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "publish=true" >> "$GITHUB_OUTPUT" # Do not publish on PR
 
             if [[ ${{ github.ref }} == refs/heads/main ]]; then
-              echo "open_infra_pr=true" >> "$GITHUB_OUTPUT"
+              echo "open_infra_pr=true" >> "$GITHUB_OUTPUT" # open infra PR on push to main
             fi
           fi
 
