@@ -1,0 +1,43 @@
+name: Publish
+
+on:
+  pull_request:
+    branches:
+      - main
+      - hotfixes/*
+
+  push:
+    branches:
+      - main
+      - hotfixes/*
+
+jobs:
+  setup:
+    runs-on: ubuntu-22.04
+    outputs:
+      open_infra_pr: ${{ steps.setup.outputs.open_infra_pr }}
+      publish: ${{ steps.setup.outputs.publish }}
+    steps:
+      - name: Setup
+        id: setup
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+
+            if [[ ${{ github.ref }} == refs/heads/main ]]; then
+              echo "open_infra_pr=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+  api:
+    needs: [setup]
+    uses: ./.github/workflows/api.yml
+    with:
+      publish: ${{ needs.setup.outputs.publish }}
+
+  infra:
+    needs: [api, setup]
+    if: needs.setup.outputs.open_infra_pr == 'true'
+    uses: ./.github/workflows/infra.yml
+    secrets:
+      GITOPS_DEMO_BOT_GITHUB_TOKEN: ${{ secrets.GITOPS_DEMO_BOT_GITHUB_TOKEN }}

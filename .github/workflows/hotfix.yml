@@ -1,0 +1,27 @@
+name: Hotfix
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_commit_sha:
+        required: true
+        type: string
+      branch_name:
+        required: true
+        type: string
+
+jobs:
+  hotfix:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+        with:
+          ref: ${{ github.event.inputs.base_commit_sha }}
+          token: ${{ secrets.GITOPS_DEMO_BOT_GITHUB_TOKEN }}
+
+      - name: Create new branch
+        run: |
+          git switch -c hotfixes/${{ github.event.inputs.branch_name }}
+          git push origin hotfixes/${{ github.event.inputs.branch_name }}
